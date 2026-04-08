@@ -132,7 +132,23 @@ textflowcraft/
 
 ## Deployment
 
-This project is optimized for deployment on Vercel:
+### Netlify (Recommended)
+
+1. Push your code to GitHub
+2. Log in to Netlify and "Add new site" → "Import an existing project"
+3. Select your GitHub repository
+4. Configure build settings:
+   - Build command: `npm run build`
+   - Publish directory: `.next`
+5. Add your environment variables:
+   - `DATABASE_URL` - Your Neon connection string
+   - `JWT_SECRET` - Your secret key
+   - `NEXT_PUBLIC_APP_URL` - Your Netlify URL
+6. Deploy!
+
+**Note for Netlify**: Since this uses server-side features (Next.js API routes, server actions), make sure to configure the Netlify function region to match your database region for optimal performance.
+
+### Vercel (Alternative)
 
 1. Push your code to GitHub
 2. Import the project in Vercel
