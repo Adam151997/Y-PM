@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ProjectBoard } from '@/features/tasks/components/project-board';
 import { TaskListView } from '@/features/tasks/components/task-list-view';
 import { TaskDetailDialog } from '@/features/tasks/components/task-detail-dialog';
+import { CreateTaskDialog } from '@/features/tasks/components/create-task-dialog';
 import type { Task, Label } from '@/features/tasks/types';
 
 interface ProjectDetailClientProps {
@@ -17,6 +18,7 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
   const [view, setView] = useState<'board' | 'list'>('board');
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const handleTaskClick = (taskId: number) => {
     setSelectedTaskId(taskId);
@@ -25,7 +27,7 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex gap-2">
           <button
             onClick={() => setView('board')}
@@ -57,6 +59,7 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           labels={labels}
           userId={userId}
           onTaskClick={handleTaskClick}
+          onCreateClick={() => setIsCreateDialogOpen(true)}
         />
       ) : (
         <TaskListView
@@ -64,6 +67,7 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           initialTasks={initialTasks}
           labels={labels}
           onTaskClick={handleTaskClick}
+          onCreateClick={() => setIsCreateDialogOpen(true)}
         />
       )}
 
@@ -72,6 +76,13 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
         projectId={projectId}
+      />
+
+      <CreateTaskDialog
+        projectId={projectId}
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSuccess={() => {}}
       />
     </>
   );

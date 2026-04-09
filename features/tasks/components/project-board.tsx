@@ -34,12 +34,12 @@ interface ProjectBoardProps {
   labels: Label[];
   userId: number;
   onTaskClick?: (taskId: number) => void;
+  onCreateClick?: () => void;
 }
 
-export function ProjectBoard({ projectId, initialTasks, labels, userId, onTaskClick }: ProjectBoardProps) {
+export function ProjectBoard({ projectId, initialTasks, labels, userId, onTaskClick, onCreateClick }: ProjectBoardProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [createTaskStatus, setCreateTaskStatus] = useState<string>('todo');
   const queryClient = useQueryClient();
 
@@ -178,12 +178,13 @@ export function ProjectBoard({ projectId, initialTasks, labels, userId, onTaskCl
 
   const handleAddTask = (status: string) => {
     setCreateTaskStatus(status);
-    setIsCreateDialogOpen(true);
+    if (onCreateClick) {
+      onCreateClick();
+    }
   };
 
   const handleTaskCreated = (newTask: Task) => {
     setTasks((prev) => [...prev, newTask]);
-    setIsCreateDialogOpen(false);
   };
 
   return (
@@ -223,14 +224,6 @@ export function ProjectBoard({ projectId, initialTasks, labels, userId, onTaskCl
           )}
         </DragOverlay>
       </DndContext>
-
-      <CreateTaskDialog
-        projectId={projectId}
-        defaultStatus={createTaskStatus}
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onSuccess={handleTaskCreated}
-      />
     </>
   );
 }

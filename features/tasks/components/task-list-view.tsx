@@ -19,7 +19,7 @@ import {
   LayoutGrid, List, CalendarDays, Plus
 } from 'lucide-react';
 import { format } from 'date-fns';
-import Link from 'next/link';
+
 import { getTasks } from '@/features/tasks/server-actions';
 import type { Task, Label } from '@/features/tasks/types';
 
@@ -28,6 +28,7 @@ interface TaskListViewProps {
   initialTasks: Task[];
   labels: Label[];
   onTaskClick?: (taskId: number) => void;
+  onCreateClick?: () => void;
 }
 
 const priorityColors = {
@@ -46,7 +47,7 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
 };
 
-export function TaskListView({ projectId, initialTasks, labels, onTaskClick }: TaskListViewProps) {
+export function TaskListView({ projectId, initialTasks, labels, onTaskClick, onCreateClick }: TaskListViewProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
@@ -92,11 +93,9 @@ export function TaskListView({ projectId, initialTasks, labels, onTaskClick }: T
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button asChild>
-          <Link href={`/projects/${projectId}/tasks/new`}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Task
-          </Link>
+        <Button onClick={onCreateClick}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Task
         </Button>
       </div>
 
