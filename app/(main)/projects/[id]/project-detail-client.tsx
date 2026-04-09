@@ -67,6 +67,12 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
             Timeline
           </button>
         </div>
+        <button
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
+        >
+          + Add Task
+        </button>
       </div>
 
       {view === 'board' && (
