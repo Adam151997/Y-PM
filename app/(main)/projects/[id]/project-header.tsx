@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Settings, ArrowLeft } from 'lucide-react';
+import { Settings, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -32,10 +32,6 @@ export function ProjectHeader({ projectId, projectName, projectColor }: ProjectH
       <div className="flex items-center gap-2">
         <Button variant="outline" size="icon">
           <Settings className="h-4 w-4" />
-        </Button>
-        <Button onClick={() => window.dispatchEvent(new CustomEvent('openCreateTask'))}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Task
         </Button>
       </div>
     </div>
