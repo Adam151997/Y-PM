@@ -4,10 +4,11 @@ import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { eq, and } from 'drizzle-orm';
 import { ProjectDetailClient } from './project-detail-client';
+import { ProjectHeader } from './project-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, Settings, ArrowLeft, LayoutGrid, List } from 'lucide-react';
+import { Settings, ArrowLeft, LayoutGrid, List } from 'lucide-react';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -65,36 +66,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/projects">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: project.color || '#6366f1' }}
-              />
-              <h1 className="text-3xl font-bold">{project.name}</h1>
-            </div>
-            {project.description && (
-              <p className="text-muted-foreground mt-1">{project.description}</p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon">
-            <Settings className="h-4 w-4" />
-          </Button>
-          <Button onClick={() => window.dispatchEvent(new CustomEvent('openCreateTask'))}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Task
-          </Button>
-        </div>
-      </div>
+      <ProjectHeader 
+        projectId={projectId} 
+        projectName={project.name} 
+        projectColor={project.color || '#6366f1'}
+      />
 
       <Tabs defaultValue="board" className="space-y-4">
         <TabsList>
