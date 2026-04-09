@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ProjectBoard } from '@/features/tasks/components/project-board';
 import { TaskListView } from '@/features/tasks/components/task-list-view';
+import { TaskTimelineView } from '@/features/tasks/components/task-timeline-view';
 import { TaskDetailDialog } from '@/features/tasks/components/task-detail-dialog';
 import { CreateTaskDialog } from '@/features/tasks/components/create-task-dialog';
 import type { Task, Label } from '@/features/tasks/types';
@@ -15,7 +16,7 @@ interface ProjectDetailClientProps {
 }
 
 export function ProjectDetailClient({ projectId, initialTasks, labels, userId }: ProjectDetailClientProps) {
-  const [view, setView] = useState<'board' | 'list'>('board');
+  const [view, setView] = useState<'board' | 'list' | 'timeline'>('board');
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -49,10 +50,20 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           >
             List
           </button>
+          <button
+            onClick={() => setView('timeline')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              view === 'timeline' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'bg-muted hover:bg-muted/80'
+            }`}
+          >
+            Timeline
+          </button>
         </div>
       </div>
 
-      {view === 'board' ? (
+      {view === 'board' && (
         <ProjectBoard
           projectId={projectId}
           initialTasks={initialTasks}
@@ -61,13 +72,23 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           onTaskClick={handleTaskClick}
           onCreateClick={() => setIsCreateDialogOpen(true)}
         />
-      ) : (
+      )}
+
+      {view === 'list' && (
         <TaskListView
           projectId={projectId}
           initialTasks={initialTasks}
           labels={labels}
           onTaskClick={handleTaskClick}
           onCreateClick={() => setIsCreateDialogOpen(true)}
+        />
+      )}
+
+      {view === 'timeline' && (
+        <TaskTimelineView
+          projectId={projectId}
+          initialTasks={initialTasks}
+          onTaskClick={handleTaskClick}
         />
       )}
 

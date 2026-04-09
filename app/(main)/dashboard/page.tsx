@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { FolderKanban, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { DashboardCharts } from '@/components/dashboard/dashboard-charts';
+import { desc } from 'drizzle-orm';
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -39,18 +41,32 @@ export default async function DashboardPage() {
     .limit(5);
 
   // Get task stats
-  const totalTasks = await db
+  const allTasks = await db
     .select()
     .from(tasks)
     .where(eq(tasks.assigneeId, user.id));
 
-  const completedTasks = totalTasks.filter(t => t.status === 'done');
-  const inProgressTasks = totalTasks.filter(t => t.status === 'in_progress');
+  const completedTasks = allTasks.filter(t => t.status === 'done');
+  const inProgressTasks = allTasks.filter(t => t.status === 'in_progress');
+
+  // Get project task counts for charts
+  const allProjects = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.ownerId, user.id));
+
+  const projectTaskCounts = allProjects.map(project => {
+    const projectTasks = allTasks.filter(t => t.projectId === project.id);
+    return {
+      projectName: project.name,
+      taskCount: projectTasks.length,
+    };
+  }).filter(p => p.taskCount > 0);
 
   const stats = [
     {
       title: 'Total Tasks',
-      value: totalTasks.length,
+      value: allTasks.length,
       icon: CheckCircle2,
       description: 'Assigned to you',
     },
@@ -159,6 +175,12 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Charts Section */}
+      <DashboardCharts 
+        tasks={allTasks.map(t => ({ status: t.status, priority: t.priority }))} 
+        projectTaskCounts={projectTaskCounts} 
+      />
     </div>
   );
 }

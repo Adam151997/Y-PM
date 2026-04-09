@@ -181,9 +181,28 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Assignee</Label>
-                    {task?.assignee && (
-                      <p className="text-sm">{task.assignee.name}</p>
-                    )}
+                    <Select
+                      value={task?.assigneeId?.toString() || ''}
+                      onValueChange={(v) => handleUpdateField('assigneeId', v ? parseInt(v) : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Unassigned" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Unassigned</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Calendar className="h-4 w-4" /> Start Date
+                    </Label>
+                    <Input
+                      type="date"
+                      value={task?.startDate ? new Date(task.startDate).toISOString().split('T')[0] : ''}
+                      onChange={(e) => handleUpdateField('startDate', e.target.value ? new Date(e.target.value) : null)}
+                    />
                   </div>
 
                   <div className="space-y-2">
