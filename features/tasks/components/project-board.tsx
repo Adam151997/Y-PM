@@ -177,8 +177,10 @@ export function ProjectBoard({ projectId, initialTasks, labels, userId, onTaskCl
   };
 
   const handleAddTask = (status: string) => {
+    console.log('ProjectBoard handleAddTask called, status:', status);
     setCreateTaskStatus(status);
     if (onCreateClick) {
+      console.log('ProjectBoard calling onCreateClick');
       onCreateClick();
     }
   };

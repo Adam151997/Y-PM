@@ -131,6 +131,9 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
         onOpenChange={setIsCreateDialogOpen}
         onSuccess={() => {}}
       />
+      <div style={{ position: 'fixed', bottom: 10, right: 10, zIndex: 9999, background: 'red', color: 'white', padding: 10 }}>
+        Dialog open: {isCreateDialogOpen ? 'YES' : 'NO'}
+      </div>
     </>
   );
 }
