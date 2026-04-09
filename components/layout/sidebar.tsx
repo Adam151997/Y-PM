@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -9,14 +11,21 @@ import {
   Activity,
   Settings,
   Plus,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useTheme } from 'next-themes';
 
 interface SidebarProps {
   user: {
@@ -35,70 +44,222 @@ const navigation = [
 
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   return (
-    <TooltipProvider>
-      <aside className="w-64 bg-card border-r flex flex-col">
-        <div className="p-6 border-b">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">FC</span>
+    <TooltipProvider delayDuration={0}>
+      <motion.aside
+        initial={false}
+        animate={{ width: isCollapsed ? 72 : 256 }}
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        className="h-screen bg-card border-r flex flex-col relative z-20"
+      >
+        {/* Logo */}
+        <div className="p-4 h-16 flex items-center border-b border-border/50">
+          <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 flex-shrink-0">
+              <span className="text-white font-bold text-sm">FC</span>
             </div>
-            <span className="font-bold text-lg">FlowCraft</span>
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="font-bold text-lg text-foreground whitespace-nowrap"
+                >
+                  FlowCraft
+                </motion.span>
+              )}
+            </AnimatePresence>
           </Link>
         </div>
 
-        <div className="p-4">
-          <Button className="w-full" asChild>
+        {/* New Project Button */}
+        <div className="p-3">
+          <Button
+            asChild
+            className={cn(
+              'w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 border-0 shadow-lg shadow-indigo-500/20',
+              isCollapsed && 'px-0'
+            )}
+          >
             <Link href="/projects/new">
-              <Plus className="mr-2 h-4 w-4" />
-              New Project
+              <Plus className="h-4 w-4 flex-shrink-0" />
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="ml-2 whitespace-nowrap"
+                  >
+                    New Project
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
           </Button>
         </div>
 
-        <nav className="flex-1 px-4 py-2 space-y-1">
+        {/* Search - Command Palette Trigger */}
+        <div className="px-3 pb-3">
+          <button
+            className={cn(
+              'w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50 text-muted-foreground text-sm border border-border/50 hover:bg-secondary/80 transition-colors',
+              isCollapsed && 'px-2 justify-center'
+            )}
+          >
+            <Search className="h-4 w-4 flex-shrink-0" />
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 text-left whitespace-nowrap"
+                >
+                  Search...
+                </motion.span>
+              )}
+            </AnimatePresence>
+            {!isCollapsed && (
+              <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            )}
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
-              <Tooltip key={item.name} delayDuration={0}>
+              <Tooltip key={item.name}>
                 <TooltipTrigger asChild>
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        ? 'bg-indigo-500/10 text-indigo-400'
+                        : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground',
+                      isCollapsed && 'justify-center px-2'
                     )}
                   >
-                    <item.icon className="h-5 w-5" />
-                    {item.name}
+                    <item.icon
+                      className={cn(
+                        'h-5 w-5 flex-shrink-0',
+                        isActive && 'text-indigo-400'
+                      )}
+                    />
+                    <AnimatePresence>
+                      {!isCollapsed && (
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="whitespace-nowrap"
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">
-                  {item.name}
-                </TooltipContent>
+                {isCollapsed && (
+                  <TooltipContent side="right">{item.name}</TooltipContent>
+                )}
               </Tooltip>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t">
-          <Tooltip delayDuration={0}>
+        {/* Bottom Section */}
+        <div className="p-3 border-t border-border/50">
+          {/* Theme Toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200',
+                  isCollapsed && 'justify-center px-2'
+                )}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5 flex-shrink-0" />
+                ) : (
+                  <Moon className="h-5 w-5 flex-shrink-0" />
+                )}
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="whitespace-nowrap"
+                    >
+                      {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            </TooltipTrigger>
+            {isCollapsed && (
+              <TooltipContent side="right">
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </TooltipContent>
+            )}
+          </Tooltip>
+
+          {/* Settings */}
+          <Tooltip>
             <TooltipTrigger asChild>
               <Link
                 href="/settings"
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full"
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200 mt-1',
+                  isCollapsed && 'justify-center px-2'
+                )}
               >
-                <Settings className="h-5 w-5" />
-                Settings
+                <Settings className="h-5 w-5 flex-shrink-0" />
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="whitespace-nowrap"
+                    >
+                      Settings
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
+            {isCollapsed && (
+              <TooltipContent side="right">Settings</TooltipContent>
+            )}
           </Tooltip>
         </div>
-      </aside>
+
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shadow-sm"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-3 w-3" />
+          ) : (
+            <ChevronLeft className="h-3 w-3" />
+          )}
+        </button>
+      </motion.aside>
     </TooltipProvider>
   );
 }
