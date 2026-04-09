@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createTaskSchema, type CreateTaskInput } from '@/features/tasks/types';
@@ -39,13 +39,19 @@ interface CreateTaskDialogProps {
 
 export function CreateTaskDialog({
   projectId,
-  defaultStatus = 'todo',
+  defaultStatus: initialStatus = 'todo',
   open,
   onOpenChange,
   onSuccess,
 }: CreateTaskDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [defaultStatus, setDefaultStatus] = useState(initialStatus);
   const queryClient = useQueryClient();
+
+  // Update default status when initialStatus changes
+  useEffect(() => {
+    setDefaultStatus(initialStatus);
+  }, [initialStatus]);
 
   const {
     register,
