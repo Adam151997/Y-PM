@@ -1,14 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Gantt, Task as GanttTask, ViewMode } from 'gantt-task-react';
+import { Gantt, ViewMode, type Task } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
-import { format, parseISO, startOfDay, endOfDay, addDays } from 'date-fns';
-import type { Task } from '@/features/tasks/types';
+import { parseISO, startOfDay, endOfDay, addDays } from 'date-fns';
+import type { Task as AppTask } from '@/features/tasks/types';
 
 interface TaskTimelineViewProps {
   projectId: number;
-  initialTasks: Task[];
+  initialTasks: AppTask[];
   onTaskClick?: (taskId: number) => void;
 }
 
@@ -24,13 +24,13 @@ const statusColors: Record<string, string> = {
 export function TaskTimelineView({ projectId, initialTasks, onTaskClick }: TaskTimelineViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Week);
 
-  const tasks: GanttTask[] = useMemo(() => {
+  const tasks: Task[] = useMemo(() => {
     return initialTasks
       .filter((task) => task.startDate || task.dueDate)
       .map((task) => {
         const start = task.startDate ? parseISO(task.startDate.toString()) : new Date();
         const end = task.dueDate ? parseISO(task.dueDate.toString()) : addDays(start, 1);
-        
+
         return {
           id: `task-${task.id}`,
           name: task.title,
@@ -50,7 +50,7 @@ export function TaskTimelineView({ projectId, initialTasks, onTaskClick }: TaskT
       });
   }, [initialTasks]);
 
-  const handleTaskClick = (task: GanttTask) => {
+  const handleTaskClick = (task: Task) => {
     const taskId = parseInt(task.id.replace('task-', ''));
     onTaskClick?.(taskId);
   };
@@ -107,12 +107,8 @@ export function TaskTimelineView({ projectId, initialTasks, onTaskClick }: TaskT
         <Gantt
           tasks={tasks}
           viewMode={viewMode}
-          onDateChange={(task, children) => {
-            // Could implement drag-to-change dates here
-          }}
-          onProgressChange={(task, progress) => {
-            // Could implement progress change here
-          }}
+          onDateChange={() => {}}
+          onProgressChange={() => {}}
           onClick={handleTaskClick}
           listCellWidth=""
           columnWidth={viewMode === ViewMode.Day ? 50 : viewMode === ViewMode.Week ? 100 : 200}
