@@ -1,24 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createTaskSchema, type CreateTaskInput } from '@/features/tasks/types';
-import { createTask } from '@/features/tasks/server-actions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogOverlay,
-} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -39,19 +29,13 @@ interface CreateTaskDialogProps {
 
 export function CreateTaskDialog({
   projectId,
-  defaultStatus: initialStatus = 'todo',
+  defaultStatus = 'todo',
   open,
   onOpenChange,
   onSuccess,
 }: CreateTaskDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [defaultStatus, setDefaultStatus] = useState(initialStatus);
   const queryClient = useQueryClient();
-
-  // Update default status when initialStatus changes
-  useEffect(() => {
-    setDefaultStatus(initialStatus);
-  }, [initialStatus]);
 
   const {
     register,
@@ -104,16 +88,15 @@ export function CreateTaskDialog({
 
   if (!open) return null;
 
-  console.log('[CreateTaskDialog] open:', open, 'projectId:', projectId);
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="bg-black/80 z-[9998]" />
-      <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-xl border border-border/50 shadow-2xl z-[9999]">
-        <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
-          <DialogDescription>Add a new task to your project</DialogDescription>
-        </DialogHeader>
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center">
+      <div 
+        className="absolute inset-0 bg-black/80" 
+        onClick={() => onOpenChange(false)}
+      />
+      <div className="relative z-[100000] bg-card border border-border p-6 rounded-lg max-w-md w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">Create New Task</h2>
+        
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Task Title</Label>
@@ -177,28 +160,22 @@ export function CreateTaskDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
-                {...register('startDate')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dueDate">Due Date</Label>
-              <Input
-                id="dueDate"
-                type="date"
-                {...register('dueDate')}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="dueDate">Due Date</Label>
+            <Input
+              id="dueDate"
+              type="date"
+              {...register('dueDate')}
+            />
           </div>
 
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="hover:bg-secondary/50">
+          <div className="flex gap-2 justify-end mt-6">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="hover:bg-secondary/50"
+            >
               Cancel
             </Button>
             <Button 
@@ -208,9 +185,9 @@ export function CreateTaskDialog({
             >
               {isLoading ? 'Creating...' : 'Create Task'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
