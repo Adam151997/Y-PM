@@ -37,33 +37,33 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex gap-1 p-1 bg-secondary/50 rounded-xl">
           <button
             onClick={() => setView('board')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              view === 'board' 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted hover:bg-muted/80'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              view === 'board'
+                ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20'
+                : 'hover:bg-secondary text-muted-foreground'
             }`}
           >
             Board
           </button>
           <button
             onClick={() => setView('list')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              view === 'list' 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted hover:bg-muted/80'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              view === 'list'
+                ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20'
+                : 'hover:bg-secondary text-muted-foreground'
             }`}
           >
             List
           </button>
           <button
             onClick={() => setView('timeline')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              view === 'timeline' 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted hover:bg-muted/80'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              view === 'timeline'
+                ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20'
+                : 'hover:bg-secondary text-muted-foreground'
             }`}
           >
             Timeline
@@ -73,7 +73,7 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           onClick={() => {
             setIsCreateDialogOpen(true);
           }}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
+          className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl text-sm font-medium shadow-lg shadow-indigo-500/20 hover:from-indigo-600 hover:to-violet-700 transition-all hover:scale-[1.02]"
         >
           + Add Task
         </button>
@@ -86,7 +86,6 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           labels={labels}
           userId={userId}
           onTaskClick={handleTaskClick}
-          onCreateClick={() => setIsCreateDialogOpen(true)}
         />
       )}
 
@@ -96,7 +95,6 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           initialTasks={initialTasks}
           labels={labels}
           onTaskClick={handleTaskClick}
-          onCreateClick={() => setIsCreateDialogOpen(true)}
         />
       )}
 
@@ -108,12 +106,14 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
         />
       )}
 
-      <TaskDetailDialog
-        taskId={selectedTaskId}
-        open={isDetailDialogOpen}
-        onOpenChange={setIsDetailDialogOpen}
-        projectId={projectId}
-      />
+      {selectedTaskId && (
+        <TaskDetailDialog
+          projectId={projectId}
+          taskId={selectedTaskId}
+          open={isDetailDialogOpen}
+          onOpenChange={setIsDetailDialogOpen}
+        />
+      )}
 
       <CreateTaskDialog
         projectId={projectId}

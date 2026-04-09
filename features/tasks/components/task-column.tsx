@@ -21,16 +21,30 @@ export function TaskColumn({ status, title, tasks, labels, onAddTask, onTaskClic
     id: status,
   });
 
+  // Get status color
+  const getStatusColor = (s: string) => {
+    switch (s) {
+      case 'todo': return 'bg-slate-500';
+      case 'in_progress': return 'bg-amber-500';
+      case 'in_review': return 'bg-indigo-500';
+      case 'done': return 'bg-emerald-500';
+      default: return 'bg-slate-500';
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
-      className={`flex-shrink-0 w-80 bg-muted/30 rounded-lg p-3 transition-colors ${
-        isOver ? 'bg-primary/10' : ''
+      className={`flex-shrink-0 w-72 bg-card/40 backdrop-blur-sm rounded-xl border border-border/30 p-3 transition-all ${
+        isOver ? 'bg-primary/10 border-primary/30 shadow-lg shadow-primary/10' : ''
       }`}
     >
       <div className="flex items-center justify-between mb-3 px-1">
-        <h3 className="font-semibold text-sm">{title}</h3>
-        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+        <div className="flex items-center gap-2">
+          <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(status)}`} />
+          <h3 className="font-semibold text-sm">{title}</h3>
+        </div>
+        <span className="text-xs text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full">
           {tasks.length}
         </span>
       </div>
@@ -46,7 +60,7 @@ export function TaskColumn({ status, title, tasks, labels, onAddTask, onTaskClic
       <Button
         variant="ghost"
         size="sm"
-        className="w-full mt-2 text-muted-foreground hover:text-foreground"
+        className="w-full mt-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-all"
         onClick={onAddTask}
       >
         <Plus className="h-4 w-4 mr-1" />

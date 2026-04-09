@@ -73,12 +73,18 @@ export default async function ProjectDetailPage({ params }: PageProps) {
       />
 
       <Tabs defaultValue="board" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="board" className="flex items-center gap-2">
+        <TabsList className="bg-secondary/50 p-1 h-auto gap-1">
+          <TabsTrigger 
+            value="board" 
+            className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-600 data-[state=active]:text-white transition-all"
+          >
             <LayoutGrid className="h-4 w-4" />
             Board
           </TabsTrigger>
-          <TabsTrigger value="list" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="list" 
+            className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-violet-600 data-[state=active]:text-white transition-all"
+          >
             <List className="h-4 w-4" />
             List
           </TabsTrigger>
