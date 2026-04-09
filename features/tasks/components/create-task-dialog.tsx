@@ -96,16 +96,19 @@ export function CreateTaskDialog({
     });
   };
 
+  if (!open) return null;
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       console.log('Dialog onOpenChange:', isOpen);
       onOpenChange(isOpen);
     }}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
-          <DialogDescription>Add a new task to your project</DialogDescription>
-        </DialogHeader>
+      <div data-testid="dialog-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }} />
+      <div data-testid="dialog-content" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#1a1a1a', padding: 20, borderRadius: 8, zIndex: 9999, minWidth: 400, border: '1px solid #333' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>Create New Task</h2>
+          <button onClick={() => onOpenChange(false)} style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: 20 }}>×</button>
+        </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Task Title</Label>
@@ -198,7 +201,7 @@ export function CreateTaskDialog({
             </Button>
           </DialogFooter>
         </form>
-      </DialogContent>
+      </div>
     </Dialog>
   );
 }
