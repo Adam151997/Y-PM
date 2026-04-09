@@ -4,9 +4,11 @@ import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { eq, and } from 'drizzle-orm';
 import { ProjectBoard } from '@/features/tasks/components/project-board';
+import { TaskListView } from '@/features/tasks/components/task-list-view';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, Settings, ArrowLeft } from 'lucide-react';
+import { Plus, Settings, ArrowLeft, LayoutGrid, List } from 'lucide-react';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -98,12 +100,34 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      <ProjectBoard
-        projectId={projectId}
-        initialTasks={projectTasks as any}
-        labels={projectLabels as any}
-        userId={user.id}
-      />
+      <Tabs defaultValue="board" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="board" className="flex items-center gap-2">
+            <LayoutGrid className="h-4 w-4" />
+            Board
+          </TabsTrigger>
+          <TabsTrigger value="list" className="flex items-center gap-2">
+            <List className="h-4 w-4" />
+            List
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="board">
+          <ProjectBoard
+            projectId={projectId}
+            initialTasks={projectTasks as any}
+            labels={projectLabels as any}
+            userId={user.id}
+          />
+        </TabsContent>
+
+        <TabsContent value="list">
+          <TaskListView
+            projectId={projectId}
+            userId={user.id}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

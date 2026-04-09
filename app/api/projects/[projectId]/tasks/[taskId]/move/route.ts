@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateTask } from '@/features/tasks/server-actions';
+import { moveTask } from '@/features/tasks/server-actions';
 import { getCurrentUser } from '@/lib/auth';
 
 interface RouteParams {
@@ -20,11 +20,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const body = await request.json();
     const { status, order } = body;
 
-    const task = await updateTask({
-      id: parseInt(taskId),
-      status,
-      order,
-    });
+    const task = await moveTask(parseInt(taskId), status, order);
 
     return NextResponse.json(task);
   } catch (error) {

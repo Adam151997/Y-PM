@@ -119,7 +119,7 @@ export async function createTask(input: CreateTaskInput) {
   return task;
 }
 
-export async function updateTask(input: UpdateTaskInput) {
+export async function updateTaskTask(input: UpdateTaskInput) {
   const user = await getCurrentUser();
   if (!user) {
     throw new Error('Unauthorized');
@@ -247,4 +247,53 @@ export async function moveTask(taskId: number, newStatus: string, newOrder: numb
   });
 
   revalidatePath(`/projects/${task.projectId}`);
+}
+
+// Update task - for the detail dialog
+export async function updateTask(taskId: number, updates: Record<string, any>) {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const task = await db.query.tasks.findFirst({
+    where: eq(tasks.id, taskId),
+  });
+
+  if (!task) {
+    throw new Error('Task not found');
+  }
+
+  const updateData: Record<string, unknown> = {
+    ...updates,
+    updatedAt: new Date(),
+  };
+
+  // Handle date fields
+  if (updates.dueDate !== undefined) {
+    updateData.dueDate = updates.dueDate ? new Date(updates.dueDate) : null;
+  }
+  if (updates.startDate !== undefined) {
+    updateData.startDate = updates.startDate ? new Date(updates.startDate) : null;
+  }
+
+  const [updated] = await db
+    .update(tasks)
+    .set(updateData)
+    .where(eq(tasks.id, taskId))
+    .returning();
+
+  // Log activity for status changes
+  if (updates.status && updates.status !== task.status) {
+    await db.insert(activities).values({
+      projectId: task.projectId,
+      taskId,
+      userId: user.id,
+      type: 'task_updated',
+      description: `Status changed to ${updates.status}`,
+    });
+  }
+
+  revalidatePath(`/projects/${task.projectId}`);
+  return updated;
 }
