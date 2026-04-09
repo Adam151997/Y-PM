@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/features/auth/schemas';
 import { login as loginAction } from '@/features/auth/server-actions';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +12,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 
 export function LoginForm() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -27,19 +25,14 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
     try {
-      const result = await loginAction(data);
-      
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        router.push('/dashboard');
-        router.refresh();
-      }
+      // Server action will handle the redirect on success
+      await loginAction(data);
     } catch (error) {
+      // Only catch actual errors - redirect throws which we don't want to catch
       toast.error('Something went wrong. Please try again.');
-    } finally {
       setIsLoading(false);
     }
+    // Don't set isLoading to false on success - we're redirecting
   };
 
   return (

@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { users } from '@/db/schema';
-import { signToken, setAuthCookie, clearAuthCookie, getCurrentUser } from '@/lib/auth';
+import { signToken, setAuthCookie, clearAuthCookie } from '@/lib/auth';
 import { registerSchema, loginSchema, type RegisterInput, type LoginInput, internalRegisterSchema, type InternalRegisterInput } from './schemas';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
@@ -44,7 +44,8 @@ export async function register(input: InternalRegisterInput) {
   const token = signToken(newUser.id, newUser.email, newUser.name);
   await setAuthCookie(token);
 
-  return { success: true };
+  // Use server-side redirect to avoid client-side navigation issues
+  redirect('/dashboard');
 }
 
 export async function login(input: LoginInput) {
@@ -76,7 +77,8 @@ export async function login(input: LoginInput) {
   const token = signToken(user.id, user.email, user.name);
   await setAuthCookie(token);
 
-  return { success: true };
+  // Use server-side redirect to avoid client-side navigation issues
+  redirect('/dashboard');
 }
 
 export async function logout() {
@@ -85,5 +87,6 @@ export async function logout() {
 }
 
 export async function getSessionUser() {
+  const { getCurrentUser } = await import('@/lib/auth');
   return await getCurrentUser();
 }

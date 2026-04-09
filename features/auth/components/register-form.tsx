@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterInput } from '@/features/auth/schemas';
 import { register as registerAction } from '@/features/auth/server-actions';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +15,6 @@ import { toast } from 'sonner';
 export type RegisterFormInput = RegisterInput;
 
 export function RegisterForm() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -30,23 +28,18 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormInput) => {
     setIsLoading(true);
     try {
-      const result = await registerAction({
+      // Server action will handle the redirect on success
+      await registerAction({
         name: data.name,
         email: data.email,
         password: data.password,
       });
-      
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        router.push('/dashboard');
-        router.refresh();
-      }
     } catch (error) {
-      toast.error('Something went wrong');
-    } finally {
+      // Only catch actual errors - redirect throws which we don't want to catch
+      toast.error('Something went wrong. Please try again.');
       setIsLoading(false);
     }
+    // Don't set isLoading to false on success - we're redirecting
   };
 
   return (
