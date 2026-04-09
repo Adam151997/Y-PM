@@ -10,10 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ChevronRight, AlertCircle, Calendar, Link2 } from 'lucide-react';
+import { ChevronRight, AlertCircle, Calendar, Link2, X, Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { getTaskDetails, addComment, getTaskComments, updateTask } from '../server-actions';
+import { getTaskDetails, addComment, getTaskComments, updateTask, addDependency, removeDependency, getTasks } from '../server-actions';
 
 interface TaskDetailDialogProps {
   taskId: number | null;
@@ -35,6 +35,7 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('details');
   const [commentText, setCommentText] = useState('');
+  const [isAddingDependency, setIsAddingDependency] = useState(false);
 
   const { data: task, isLoading } = useQuery({
     queryKey: ['task', taskId],
@@ -46,6 +47,12 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
     queryKey: ['task-comments', taskId],
     queryFn: () => taskId ? getTaskComments(taskId) : [],
     enabled: !!taskId && open,
+  });
+
+  const { data: allTasks = [] } = useQuery({
+    queryKey: ['tasks', projectId],
+    queryFn: () => getTasks(projectId),
+    enabled: isAddingDependency,
   });
 
   const handleUpdateField = async (field: string, value: any) => {
@@ -69,6 +76,29 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
       toast.success('Comment added');
     } catch (error) {
       toast.error('Failed to add comment');
+    }
+  };
+
+  const handleAddDependency = async (dependsOnTaskId: number) => {
+    if (!taskId) return;
+    try {
+      await addDependency(taskId, dependsOnTaskId);
+      setIsAddingDependency(false);
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      toast.success('Dependency added');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to add dependency');
+    }
+  };
+
+  const handleRemoveDependency = async (dependencyId: number) => {
+    if (!taskId) return;
+    try {
+      await removeDependency(dependencyId);
+      queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+      toast.success('Dependency removed');
+    } catch (error) {
+      toast.error('Failed to remove dependency');
     }
   };
 
@@ -218,7 +248,44 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
             </TabsContent>
 
             <TabsContent value="dependencies" className="flex-1 overflow-auto mt-4">
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* Add new dependency */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add Dependency
+                    </h4>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setIsAddingDependency(!isAddingDependency)}
+                    >
+                      {isAddingDependency ? 'Cancel' : '+ Add'}
+                    </Button>
+                  </div>
+                  
+                  {isAddingDependency && (
+                    <div className="p-3 bg-muted rounded-lg space-y-2">
+                      <Select onValueChange={(v) => handleAddDependency(Number(v))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a task to depend on" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allTasks
+                            .filter((t: any) => t.id !== taskId)
+                            .filter((t: any) => !((task as any)?.dependencies || []).some((d: any) => d.dependsOnTaskId === t.id))
+                            .map((t: any) => (
+                              <SelectItem key={t.id} value={t.id.toString()}>
+                                {t.title}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
                 {/* Dependencies (tasks this task blocks) */}
                 <div className="space-y-2">
                   <h4 className="font-medium flex items-center gap-2">
@@ -227,10 +294,20 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
                   </h4>
                   {(task as any)?.dependencies?.map((dep: any) => (
                     <div key={dep.id} className="p-3 bg-muted rounded-lg flex items-center justify-between">
-                      <span>{dep.dependsOnTask?.title || `Task #${dep.dependsOnTaskId}`}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {dep.dependsOnTask?.status}
-                      </span>
+                      <div className="flex-1">
+                        <span>{dep.dependsOnTask?.title || `Task #${dep.dependsOnTaskId}`}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {dep.dependsOnTask?.status}
+                        </span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleRemoveDependency(dep.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
                   ))}
                   {(!task || !(task as any)?.dependencies?.length) && (
@@ -246,10 +323,12 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
                   </h4>
                   {(task as any)?.dependentTasks?.map((dep: any) => (
                     <div key={dep.id} className="p-3 bg-muted rounded-lg flex items-center justify-between">
-                      <span>{dep.task?.title || `Task #${dep.taskId}`}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {dep.task?.status}
-                      </span>
+                      <div className="flex-1">
+                        <span>{dep.task?.title || `Task #${dep.taskId}`}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {dep.task?.status}
+                        </span>
+                      </div>
                     </div>
                   ))}
                   {(!task || !(task as any)?.dependentTasks?.length) && (

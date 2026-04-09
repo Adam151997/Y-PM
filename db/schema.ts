@@ -17,6 +17,8 @@ export const activityTypeEnum = pgEnum('activity_type', [
   'label_removed',
   'priority_changed',
   'due_date_changed',
+  'dependency_added',
+  'dependency_removed',
 ]);
 
 // Users Table

@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { tasks, activities, comments } from '@/db/schema';
+import { tasks, activities, comments, taskDependencies } from '@/db/schema';
 import { getCurrentUser } from '@/lib/auth';
 import { createTaskSchema, updateTaskSchema, type CreateTaskInput, type UpdateTaskInput } from './types';
 import { revalidatePath } from 'next/cache';
@@ -389,4 +389,97 @@ export async function addComment(taskId: number, content: string) {
 
   revalidatePath(`/projects/${task.projectId}`);
   return comment;
+}
+
+// Add a dependency to a task
+export async function addDependency(taskId: number, dependsOnTaskId: number) {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  // Verify both tasks exist
+  const [task, dependsOnTask] = await Promise.all([
+    db.query.tasks.findFirst({ where: eq(tasks.id, taskId) }),
+    db.query.tasks.findFirst({ where: eq(tasks.id, dependsOnTaskId) }),
+  ]);
+
+  if (!task) {
+    throw new Error('Task not found');
+  }
+
+  if (!dependsOnTask) {
+    throw new Error('Dependency task not found');
+  }
+
+  if (taskId === dependsOnTaskId) {
+    throw new Error('A task cannot depend on itself');
+  }
+
+  // Check if dependency already exists
+  const existing = await db.query.taskDependencies.findFirst({
+    where: and(
+      eq(taskDependencies.taskId, taskId),
+      eq(taskDependencies.dependsOnTaskId, dependsOnTaskId)
+    ),
+  });
+
+  if (existing) {
+    throw new Error('Dependency already exists');
+  }
+
+  const [dependency] = await db
+    .insert(taskDependencies)
+    .values({
+      taskId,
+      dependsOnTaskId,
+    })
+    .returning();
+
+  // Log activity
+  await db.insert(activities).values({
+    projectId: task.projectId,
+    taskId,
+    userId: user.id,
+    type: 'dependency_added',
+    description: `Added dependency on "${dependsOnTask.title}"`,
+  });
+
+  revalidatePath(`/projects/${task.projectId}`);
+  return dependency;
+}
+
+// Remove a dependency from a task
+export async function removeDependency(dependencyId: number) {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const dependency = await db.query.taskDependencies.findFirst({
+    where: eq(taskDependencies.id, dependencyId),
+    with: {
+      task: true,
+    },
+  });
+
+  if (!dependency) {
+    throw new Error('Dependency not found');
+  }
+
+  const taskTitle = (dependency as any).task?.title || `Task #${dependency.taskId}`;
+
+  await db.delete(taskDependencies).where(eq(taskDependencies.id, dependencyId));
+
+  // Log activity
+  await db.insert(activities).values({
+    projectId: (dependency as any).task?.projectId,
+    taskId: dependency.taskId,
+    userId: user.id,
+    type: 'dependency_removed',
+    description: `Removed dependency on "${taskTitle}"`,
+  });
+
+  revalidatePath(`/projects/${(dependency as any).task?.projectId}`);
+  return { success: true };
 }
