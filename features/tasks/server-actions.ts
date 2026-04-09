@@ -25,7 +25,7 @@ export async function getTasks(projectId: number) {
           label: true,
         },
       },
-      subtasks: true,
+      
     },
     orderBy: (tasks, { asc }) => [asc(tasks.order)],
   });
@@ -46,7 +46,7 @@ export async function getTask(id: number) {
           label: true,
         },
       },
-      subtasks: true,
+      
       dependencies: {
         with: {
           dependsOnTask: true,

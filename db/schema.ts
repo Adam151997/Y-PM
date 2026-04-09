@@ -232,7 +232,6 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     fields: [tasks.parentTaskId],
     references: [tasks.id],
   }),
-  subtasks: many(tasks, { relationName: 'subtasks' }),
   taskLabels: many(taskLabels),
   dependencies: many(taskDependencies, { relationName: 'dependencies' }),
   dependentTasks: many(taskDependencies, { relationName: 'dependentTasks' }),

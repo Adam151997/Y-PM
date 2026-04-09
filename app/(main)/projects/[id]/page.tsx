@@ -44,7 +44,6 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           label: true,
         },
       },
-      subtasks: true,
     },
     orderBy: (tasks, { asc }) => [asc(tasks.order)],
   });
