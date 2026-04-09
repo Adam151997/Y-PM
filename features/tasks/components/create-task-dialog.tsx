@@ -104,6 +104,8 @@ export function CreateTaskDialog({
 
   if (!open) return null;
 
+  console.log('[CreateTaskDialog] open:', open, 'projectId:', projectId);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="bg-black/80 z-[9998]" />

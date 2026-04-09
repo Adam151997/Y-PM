@@ -21,6 +21,8 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
+  console.log('[ProjectDetailClient] isCreateDialogOpen:', isCreateDialogOpen);
+
   useEffect(() => {
     const handleOpenCreate = () => {
       setIsCreateDialogOpen(true);
@@ -71,6 +73,7 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
         </div>
         <button
           onClick={() => {
+            console.log('[Add Task Button] Clicked, setting isCreateDialogOpen to true');
             setIsCreateDialogOpen(true);
           }}
           className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-xl text-sm font-medium shadow-lg shadow-indigo-500/20 hover:from-indigo-600 hover:to-violet-700 transition-all hover:scale-[1.02]"
@@ -115,12 +118,14 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
         />
       )}
 
-      <CreateTaskDialog
-        projectId={projectId}
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        onSuccess={() => {}}
-      />
+      {isCreateDialogOpen && (
+        <CreateTaskDialog
+          projectId={projectId}
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          onSuccess={() => {}}
+        />
+      )}
     </>
   );
 }
