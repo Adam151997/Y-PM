@@ -18,7 +18,7 @@ interface DashboardContentProps {
   stats: Array<{
     title: string;
     value: number;
-    icon: any;
+    iconName: string;
     description: string;
     color: string;
     bgColor: string;
@@ -28,6 +28,13 @@ interface DashboardContentProps {
   recentActivities: any[];
   allTasks: any[];
 }
+
+const iconMap: Record<string, any> = {
+  Target,
+  Zap,
+  CheckCircle2,
+  FolderKanban,
+};
 
 export function DashboardContent({
   stats,
@@ -63,34 +70,37 @@ export function DashboardContent({
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <Card 
-            key={stat.title} 
-            className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border transition-all duration-300 hover-lift"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </p>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="text-3xl font-bold">{stat.value}</span>
+        {stats.map((stat, index) => {
+          const IconComponent = iconMap[stat.iconName];
+          return (
+            <Card 
+              key={stat.title} 
+              className="relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-border transition-all duration-300 hover-lift"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </p>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-3xl font-bold">{stat.value}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stat.description}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stat.description}
-                  </p>
+                  <div
+                    className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}
+                  >
+                    {IconComponent && <IconComponent className={`h-6 w-6 ${stat.color}`} />}
+                  </div>
                 </div>
-                <div
-                  className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}
-                >
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Main Content Grid */}

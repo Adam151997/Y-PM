@@ -57,7 +57,7 @@ export default async function DashboardPage() {
     {
       title: 'Total Tasks',
       value: allTasks.length,
-      icon: Target,
+      iconName: 'Target',
       description: 'Assigned to you',
       color: 'text-indigo-400',
       bgColor: 'bg-indigo-500/10',
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
     {
       title: 'In Progress',
       value: inProgressTasks.length,
-      icon: Zap,
+      iconName: 'Zap',
       description: 'Currently working on',
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10',
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
     {
       title: 'Completed',
       value: completedTasks.length,
-      icon: CheckCircle2,
+      iconName: 'CheckCircle2',
       description: 'Done this month',
       color: 'text-emerald-400',
       bgColor: 'bg-emerald-500/10',
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
     {
       title: 'Projects',
       value: userProjects.length,
-      icon: FolderKanban,
+      iconName: 'FolderKanban',
       description: 'Your projects',
       color: 'text-violet-400',
       bgColor: 'bg-violet-500/10',
