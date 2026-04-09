@@ -1,14 +1,12 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Calendar, GripVertical, CheckSquare } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { getInitials, getPriorityColor } from '@/lib/utils';
+import { getInitials } from '@/lib/utils';
 import type { Task, Label } from '@/features/tasks/types';
 
 interface TaskCardProps {
@@ -45,15 +43,11 @@ export function TaskCard({ task, labels, isDragging, onClick }: TaskCardProps) {
   const isDueToday = task.dueDate && isToday(new Date(task.dueDate));
 
   return (
-    <motion.div
+    <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
       className={cn(
         'group relative bg-card/80 backdrop-blur-sm rounded-xl p-4 border border-border/50',
         'hover:border-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-200',
@@ -151,6 +145,6 @@ export function TaskCard({ task, labels, isDragging, onClick }: TaskCardProps) {
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+// Framer Motion removed - using CSS animations instead
 import {
   Bell,
   LogOut,

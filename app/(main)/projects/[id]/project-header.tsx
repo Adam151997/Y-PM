@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+// Framer Motion removed - using CSS animations instead
 import { Settings, ArrowLeft, MoreHorizontal, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,11 +28,7 @@ export function ProjectHeader({
   memberCount = 1,
 }: ProjectHeaderProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between"
-    >
+    <div className="flex items-center justify-between fade-in">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -98,6 +94,6 @@ export function ProjectHeader({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </motion.div>
+    </div>
   );
 }
