@@ -33,9 +33,10 @@ interface ProjectBoardProps {
   initialTasks: Task[];
   labels: Label[];
   userId: number;
+  onTaskClick?: (taskId: number) => void;
 }
 
-export function ProjectBoard({ projectId, initialTasks, labels, userId }: ProjectBoardProps) {
+export function ProjectBoard({ projectId, initialTasks, labels, userId, onTaskClick }: ProjectBoardProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -207,6 +208,7 @@ export function ProjectBoard({ projectId, initialTasks, labels, userId }: Projec
                 tasks={getTasksByStatus(status)}
                 labels={labels}
                 onAddTask={() => handleAddTask(status)}
+                onTaskClick={onTaskClick}
               />
             </SortableContext>
           ))}

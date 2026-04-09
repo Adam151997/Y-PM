@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { tasks, activities } from '@/db/schema';
+import { tasks, activities, comments } from '@/db/schema';
 import { getCurrentUser } from '@/lib/auth';
 import { createTaskSchema, updateTaskSchema, type CreateTaskInput, type UpdateTaskInput } from './types';
 import { revalidatePath } from 'next/cache';
@@ -296,4 +296,97 @@ export async function updateTask(taskId: number, updates: Record<string, any>) {
 
   revalidatePath(`/projects/${task.projectId}`);
   return updated;
+}
+
+// Get detailed task with all relations
+export async function getTaskDetails(taskId: number) {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const task = await db.query.tasks.findFirst({
+    where: eq(tasks.id, taskId),
+    with: {
+      assignee: true,
+      createdBy: true,
+      taskLabels: {
+        with: {
+          label: true,
+        },
+      },
+      dependencies: {
+        with: {
+          dependsOnTask: true,
+        },
+      },
+      dependentTasks: {
+        with: {
+          task: true,
+        },
+      },
+    },
+  });
+
+  if (!task) {
+    throw new Error('Task not found');
+  }
+
+  return task;
+}
+
+// Get comments for a task
+export async function getTaskComments(taskId: number) {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  return db.query.comments.findMany({
+    where: and(
+      eq(comments.taskId, taskId),
+      eq(comments.status, 'active')
+    ),
+    with: {
+      user: true,
+    },
+    orderBy: (comments, { asc }) => [asc(comments.createdAt)],
+  });
+}
+
+// Add a comment to a task
+export async function addComment(taskId: number, content: string) {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const task = await db.query.tasks.findFirst({
+    where: eq(tasks.id, taskId),
+  });
+
+  if (!task) {
+    throw new Error('Task not found');
+  }
+
+  const [comment] = await db
+    .insert(comments)
+    .values({
+      taskId,
+      userId: user.id,
+      content,
+    })
+    .returning();
+
+  // Log activity
+  await db.insert(activities).values({
+    projectId: task.projectId,
+    taskId,
+    userId: user.id,
+    type: 'comment_added',
+    description: 'Comment added to task',
+  });
+
+  revalidatePath(`/projects/${task.projectId}`);
+  return comment;
 }

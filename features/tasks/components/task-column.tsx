@@ -13,9 +13,10 @@ interface TaskColumnProps {
   tasks: Task[];
   labels: Label[];
   onAddTask: () => void;
+  onTaskClick?: (taskId: number) => void;
 }
 
-export function TaskColumn({ status, title, tasks, labels, onAddTask }: TaskColumnProps) {
+export function TaskColumn({ status, title, tasks, labels, onAddTask, onTaskClick }: TaskColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: status,
   });
@@ -37,7 +38,7 @@ export function TaskColumn({ status, title, tasks, labels, onAddTask }: TaskColu
       <div className="space-y-2 min-h-[100px]">
         <SortableContext items={tasks.map((t) => t.id.toString())} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
-            <TaskCard key={task.id} task={task} labels={labels} />
+            <TaskCard key={task.id} task={task} labels={labels} onClick={onTaskClick ? () => onTaskClick(task.id) : undefined} />
           ))}
         </SortableContext>
       </div>

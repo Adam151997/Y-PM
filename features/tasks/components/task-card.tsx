@@ -12,9 +12,10 @@ interface TaskCardProps {
   task: Task;
   labels: Label[];
   isDragging?: boolean;
+  onClick?: () => void;
 }
 
-export function TaskCard({ task, labels, isDragging }: TaskCardProps) {
+export function TaskCard({ task, labels, isDragging, onClick }: TaskCardProps) {
   const {
     attributes,
     listeners,

@@ -3,8 +3,7 @@ import { projects, tasks, labels, activities } from '@/db/schema';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { eq, and } from 'drizzle-orm';
-import { ProjectBoard } from '@/features/tasks/components/project-board';
-import { TaskListView } from '@/features/tasks/components/task-list-view';
+import { ProjectDetailClient } from './project-detail-client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -112,7 +111,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         </TabsList>
 
         <TabsContent value="board">
-          <ProjectBoard
+          <ProjectDetailClient
             projectId={projectId}
             initialTasks={projectTasks as any}
             labels={projectLabels as any}
@@ -121,8 +120,10 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         </TabsContent>
 
         <TabsContent value="list">
-          <TaskListView
+          <ProjectDetailClient
             projectId={projectId}
+            initialTasks={projectTasks as any}
+            labels={projectLabels as any}
             userId={user.id}
           />
         </TabsContent>

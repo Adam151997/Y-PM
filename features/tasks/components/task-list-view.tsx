@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { useQuery } from '@tanstack/react-query';
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
@@ -21,11 +21,13 @@ import {
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { getTasks } from '@/features/tasks/server-actions';
-import type { Task } from '@/features/tasks/types';
+import type { Task, Label } from '@/features/tasks/types';
 
 interface TaskListViewProps {
   projectId: number;
-  userId: number;
+  initialTasks: Task[];
+  labels: Label[];
+  onTaskClick?: (taskId: number) => void;
 }
 
 const priorityColors = {
@@ -44,16 +46,12 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
 };
 
-export function TaskListView({ projectId, userId }: TaskListViewProps) {
-  const router = useRouter();
+export function TaskListView({ projectId, initialTasks, labels, onTaskClick }: TaskListViewProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-  // Fetch tasks
-  const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ['tasks', projectId],
-    queryFn: () => getTasks(projectId),
-  });
+  // Use initial tasks from server
+  const tasks = initialTasks;
 
   // Filter tasks
   const filteredTasks = tasks.filter((task: any) => {
@@ -62,14 +60,6 @@ export function TaskListView({ projectId, userId }: TaskListViewProps) {
     const matchesStatus = !statusFilter || task.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-10">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -135,7 +125,7 @@ export function TaskListView({ projectId, userId }: TaskListViewProps) {
                 <TableRow 
                   key={task.id} 
                   className="cursor-pointer"
-                  onClick={() => router.push(`/projects/${projectId}/tasks/${task.id}`)}
+                  onClick={() => onTaskClick?.(task.id)}
                 >
                   <TableCell className="font-medium">
                     {task.title}

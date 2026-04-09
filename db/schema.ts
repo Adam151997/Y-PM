@@ -157,6 +157,19 @@ export const activities = pgTable('activities', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Comments Table
+export const commentStatuses = pgEnum('comment_status', ['active', 'edited', 'deleted']);
+
+export const comments = pgTable('comments', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id),
+  content: text('content').notNull(),
+  status: commentStatuses('status').default('active').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projects: many(projects),
@@ -271,6 +284,17 @@ export const activitiesRelations = relations(activities, ({ one }) => ({
   }),
   user: one(users, {
     fields: [activities.userId],
+    references: [users.id],
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  task: one(tasks, {
+    fields: [comments.taskId],
+    references: [tasks.id],
+  }),
+  user: one(users, {
+    fields: [comments.userId],
     references: [users.id],
   }),
 }));
