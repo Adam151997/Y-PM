@@ -106,8 +106,8 @@ export function TaskDetailDialog({ taskId, open, onOpenChange, projectId }: Task
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-card/95 backdrop-blur-xl border border-border/50 shadow-2xl">
+        <DialogHeader className="flex-shrink-0 p-6 border-b border-border/30">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold pr-8">
               {task?.title || 'Loading...'}
