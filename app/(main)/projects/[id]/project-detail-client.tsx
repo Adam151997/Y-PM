@@ -21,11 +21,8 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  console.log('ProjectDetailClient render, isCreateDialogOpen:', isCreateDialogOpen);
-
   useEffect(() => {
     const handleOpenCreate = () => {
-      console.log('CustomEvent received, opening create dialog');
       setIsCreateDialogOpen(true);
     };
     window.addEventListener('openCreateTask', handleOpenCreate);
@@ -33,14 +30,8 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
   }, []);
 
   const handleTaskClick = (taskId: number) => {
-    console.log('Task clicked:', taskId);
     setSelectedTaskId(taskId);
     setIsDetailDialogOpen(true);
-  };
-
-  const handleOpenCreateDialog = () => {
-    console.log('handleOpenCreateDialog called, setting to true');
-    setIsCreateDialogOpen(true);
   };
 
   return (
@@ -80,7 +71,6 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
         </div>
         <button
           onClick={() => {
-            console.log('Add Task clicked, setting open to true');
             setIsCreateDialogOpen(true);
           }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
@@ -131,9 +121,6 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
         onOpenChange={setIsCreateDialogOpen}
         onSuccess={() => {}}
       />
-      <div style={{ position: 'fixed', bottom: 10, right: 10, zIndex: 9999, background: 'red', color: 'white', padding: 10 }}>
-        Dialog open: {isCreateDialogOpen ? 'YES' : 'NO'}
-      </div>
     </>
   );
 }
