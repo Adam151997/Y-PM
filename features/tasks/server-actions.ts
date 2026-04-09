@@ -46,17 +46,6 @@ export async function getTask(id: number) {
           label: true,
         },
       },
-      
-      dependencies: {
-        with: {
-          dependsOnTask: true,
-        },
-      },
-      dependentTasks: {
-        with: {
-          task: true,
-        },
-      },
     },
   });
 
@@ -313,16 +302,6 @@ export async function getTaskDetails(taskId: number) {
       taskLabels: {
         with: {
           label: true,
-        },
-      },
-      dependencies: {
-        with: {
-          dependsOnTask: true,
-        },
-      },
-      dependentTasks: {
-        with: {
-          task: true,
         },
       },
     },
