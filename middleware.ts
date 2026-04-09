@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from './lib/auth';
+import jwt from 'jsonwebtoken';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('flowcraft-token')?.value;
+  const token = request.cookies.get('auth-token')?.value;
   const { pathname } = request.nextUrl;
 
   // Allow public routes
-  const publicPaths = ['/login', '/register', '/api'];
+  const publicPaths = ['/login', '/register', '/api', '/_next', '/favicon.ico'];
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
 
   if (isPublicPath) {
@@ -22,24 +22,35 @@ export function middleware(request: NextRequest) {
   }
 
   // Verify token
-  const payload = verifyToken(token);
-  if (!payload) {
-    // Token invalid, redirect to login
+  const JWT_SECRET = process.env.JWT_SECRET;
+  if (!JWT_SECRET) {
     const loginUrl = new URL('/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Add user info to headers for server components
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-user-id', payload.userId.toString());
-  requestHeaders.set('x-user-email', payload.email);
-  requestHeaders.set('x-user-name', payload.name);
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as {
+      userId: number;
+      email: string;
+      name: string;
+    };
 
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+    // Add user info to headers for server components
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', payload.userId.toString());
+    requestHeaders.set('x-user-email', payload.email);
+    requestHeaders.set('x-user-name', payload.name);
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  } catch {
+    // Token invalid, redirect to login
+    const loginUrl = new URL('/login', request.url);
+    return NextResponse.redirect(loginUrl);
+  }
 }
 
 export const config = {

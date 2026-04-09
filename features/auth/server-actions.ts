@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { users } from '@/db/schema';
-import { createToken, setAuthCookie, clearAuthCookie } from '@/lib/auth';
+import { signToken, setAuthCookie, clearAuthCookie, getCurrentUser } from '@/lib/auth';
 import { registerSchema, loginSchema, type RegisterInput, type LoginInput, internalRegisterSchema, type InternalRegisterInput } from './schemas';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
@@ -41,13 +41,8 @@ export async function register(input: InternalRegisterInput) {
   });
 
   // Create token and set cookie
-  const token = createToken({
-    userId: newUser.id,
-    email: newUser.email,
-    name: newUser.name,
-  });
-
-  setAuthCookie(token);
+  const token = signToken(newUser.id, newUser.email, newUser.name);
+  await setAuthCookie(token);
 
   return { success: true };
 }
@@ -78,23 +73,17 @@ export async function login(input: LoginInput) {
   }
 
   // Create token and set cookie
-  const token = createToken({
-    userId: user.id,
-    email: user.email,
-    name: user.name,
-  });
-
-  setAuthCookie(token);
+  const token = signToken(user.id, user.email, user.name);
+  await setAuthCookie(token);
 
   return { success: true };
 }
 
 export async function logout() {
-  clearAuthCookie();
+  await clearAuthCookie();
   redirect('/login');
 }
 
-export async function getCurrentUser() {
-  const { getCurrentUser } = await import('@/lib/auth');
-  return getCurrentUser();
+export async function getSessionUser() {
+  return await getCurrentUser();
 }

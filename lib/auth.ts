@@ -4,13 +4,8 @@ import { db } from './db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-const COOKIE_NAME = 'flowcraft-token';
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is not set');
-}
+const COOKIE_NAME = 'auth-token';
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 export interface JWTPayload {
   userId: number;
@@ -18,16 +13,12 @@ export interface JWTPayload {
   name: string;
 }
 
-export function createToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: '30d' });
-}
-
-export function verifyToken(token: string): JWTPayload | null {
-  try {
-    return jwt.verify(token, JWT_SECRET!) as JWTPayload;
-  } catch {
-    return null;
-  }
+export function signToken(userId: number, email: string, name: string): string {
+  return jwt.sign(
+    { userId, email, name },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
 }
 
 export async function setAuthCookie(token: string) {
@@ -36,9 +27,36 @@ export async function setAuthCookie(token: string) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
   });
+}
+
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+
+  if (!token) return null;
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    
+    // Get full user from database
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, decoded.userId),
+    });
+
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatar,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function clearAuthCookie() {
@@ -46,37 +64,10 @@ export async function clearAuthCookie() {
   cookieStore.delete(COOKIE_NAME);
 }
 
-export async function getCurrentUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-
-  if (!token) {
-    return null;
-  }
-
-  const payload = verifyToken(token);
-  if (!payload) {
-    return null;
-  }
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, payload.userId),
-  });
-
+export async function requireAuth() {
+  const user = await getCurrentUser();
   if (!user) {
     return null;
   }
-
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    avatar: user.avatar,
-  };
-}
-
-export function getAuthFromHeader(): JWTPayload | null {
-  // This is for server actions that might need to get user from headers
-  // Note: Can't use cookies() in server actions the same way
-  return null;
+  return user;
 }

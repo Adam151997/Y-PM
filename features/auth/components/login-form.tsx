@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '@/features/auth/schemas';
-import { login } from '@/features/auth/server-actions';
+import { login as loginAction } from '@/features/auth/server-actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const {
-    register,
+    register: formRegister,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginInput>({
@@ -26,14 +26,19 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
-    const result = await login(data);
-    
-    if (result.error) {
-      toast.error(result.error);
+    try {
+      const result = await loginAction(data);
+      
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        router.push('/dashboard');
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
       setIsLoading(false);
-    } else {
-      router.push('/dashboard');
-      router.refresh();
     }
   };
 
@@ -51,7 +56,7 @@ export function LoginForm() {
               id="email"
               type="email"
               placeholder="name@example.com"
-              {...register('email')}
+              {...formRegister('email')}
             />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -63,7 +68,7 @@ export function LoginForm() {
               id="password"
               type="password"
               placeholder="Enter your password"
-              {...register('password')}
+              {...formRegister('password')}
             />
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
