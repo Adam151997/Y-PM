@@ -14,12 +14,18 @@ export default async function MainLayout({
     redirect('/login');
   }
 
+  // Ensure avatar is never undefined
+  const safeUser = {
+    ...user,
+    avatar: user.avatar ?? null,
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex h-screen">
-        <Sidebar user={user} />
+        <Sidebar user={safeUser} />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <Header user={user} />
+          <Header user={safeUser} />
           <main className="flex-1 overflow-auto p-6">
             {children}
           </main>

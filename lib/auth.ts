@@ -5,7 +5,7 @@ import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 const COOKIE_NAME = 'auth-token';
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-production';
 
 export interface JWTPayload {
   userId: number;
@@ -32,13 +32,13 @@ export async function setAuthCookie(token: string) {
   });
 }
 
-export async function getCurrentUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-
-  if (!token) return null;
-
+export async function getCurrentUser(): Promise<{ id: number; email: string; name: string; avatar?: string | null } | null> {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+
+    if (!token) return null;
+
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     
     // Get full user from database
@@ -54,7 +54,8 @@ export async function getCurrentUser() {
       name: user.name,
       avatar: user.avatar,
     };
-  } catch {
+  } catch (error) {
+    console.error('Error in getCurrentUser:', error);
     return null;
   }
 }

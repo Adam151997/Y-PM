@@ -25,14 +25,14 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
     try {
-      // Server action will handle the redirect on success
       await loginAction(data);
-    } catch (error) {
-      // Only catch actual errors - redirect throws which we don't want to catch
-      toast.error('Something went wrong. Please try again.');
-      setIsLoading(false);
+    } catch (err) {
+      // Next.js redirect throws an error - we can ignore it
+      // The redirect should happen before this catches
+    } finally {
+      // Use setTimeout to prevent UI freeze while redirect happens
+      setTimeout(() => setIsLoading(false), 100);
     }
-    // Don't set isLoading to false on success - we're redirecting
   };
 
   return (

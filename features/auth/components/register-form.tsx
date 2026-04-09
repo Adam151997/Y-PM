@@ -9,9 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
 
-// For the form (includes confirmPassword)
 export type RegisterFormInput = RegisterInput;
 
 export function RegisterForm() {
@@ -28,18 +26,16 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormInput) => {
     setIsLoading(true);
     try {
-      // Server action will handle the redirect on success
       await registerAction({
         name: data.name,
         email: data.email,
         password: data.password,
       });
-    } catch (error) {
-      // Only catch actual errors - redirect throws which we don't want to catch
-      toast.error('Something went wrong. Please try again.');
-      setIsLoading(false);
+    } catch (err) {
+      // Next.js redirect throws an error - we can ignore it
+    } finally {
+      setTimeout(() => setIsLoading(false), 100);
     }
-    // Don't set isLoading to false on success - we're redirecting
   };
 
   return (

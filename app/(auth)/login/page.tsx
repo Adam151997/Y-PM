@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { LoginForm } from '@/features/auth/components/login-form';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Login - FlowCraft',
   description: 'Sign in to your FlowCraft account',

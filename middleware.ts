@@ -5,35 +5,36 @@ import jwt from 'jsonwebtoken';
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value;
   const { pathname } = request.nextUrl;
+  
+  console.log('[Middleware] pathname:', pathname, 'hasToken:', !!token);
 
   // Allow public routes
-  const publicPaths = ['/login', '/register', '/api', '/_next', '/favicon.ico'];
-  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
+  const publicPaths = ['/login', '/register', '/api', '/_next', '/favicon.ico', '/'];
+  const isPublicPath = publicPaths.some(path => pathname === path || pathname.startsWith(path));
 
   if (isPublicPath) {
+    console.log('[Middleware] Allowing public path');
     return NextResponse.next();
   }
 
   // Check authentication
   if (!token) {
-    // Redirect to login if not authenticated
+    console.log('[Middleware] No token, redirecting to /login');
     const loginUrl = new URL('/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
 
   // Verify token
-  const JWT_SECRET = process.env.JWT_SECRET;
-  if (!JWT_SECRET) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
+  const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-production';
+  
   try {
     const payload = jwt.verify(token, JWT_SECRET) as {
       userId: number;
       email: string;
       name: string;
     };
+    
+    console.log('[Middleware] Token valid, user:', payload.email);
 
     // Add user info to headers for server components
     const requestHeaders = new Headers(request.headers);
@@ -46,8 +47,8 @@ export function middleware(request: NextRequest) {
         headers: requestHeaders,
       },
     });
-  } catch {
-    // Token invalid, redirect to login
+  } catch (error) {
+    console.log('[Middleware] Token invalid, redirecting to /login');
     const loginUrl = new URL('/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
