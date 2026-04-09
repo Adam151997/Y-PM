@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProjectBoard } from '@/features/tasks/components/project-board';
 import { TaskListView } from '@/features/tasks/components/task-list-view';
 import { TaskTimelineView } from '@/features/tasks/components/task-timeline-view';
@@ -20,6 +20,12 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenCreate = () => setIsCreateDialogOpen(true);
+    window.addEventListener('openCreateTask', handleOpenCreate);
+    return () => window.removeEventListener('openCreateTask', handleOpenCreate);
+  }, []);
 
   const handleTaskClick = (taskId: number) => {
     setSelectedTaskId(taskId);

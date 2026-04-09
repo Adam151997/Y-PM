@@ -89,11 +89,9 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           <Button variant="outline" size="icon">
             <Settings className="h-4 w-4" />
           </Button>
-          <Button asChild>
-            <Link href={`/projects/${projectId}/tasks/new`}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Task
-            </Link>
+          <Button onClick={() => window.dispatchEvent(new CustomEvent('openCreateTask'))}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Task
           </Button>
         </div>
       </div>
