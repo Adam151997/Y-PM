@@ -68,7 +68,10 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
           </button>
         </div>
         <button
-          onClick={() => setIsCreateDialogOpen(true)}
+          onClick={() => {
+            console.log('Add Task clicked, setting open to true');
+            setIsCreateDialogOpen(true);
+          }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium"
         >
           + Add Task
