@@ -21,15 +21,26 @@ export function ProjectDetailClient({ projectId, initialTasks, labels, userId }:
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
+  console.log('ProjectDetailClient render, isCreateDialogOpen:', isCreateDialogOpen);
+
   useEffect(() => {
-    const handleOpenCreate = () => setIsCreateDialogOpen(true);
+    const handleOpenCreate = () => {
+      console.log('CustomEvent received, opening create dialog');
+      setIsCreateDialogOpen(true);
+    };
     window.addEventListener('openCreateTask', handleOpenCreate);
     return () => window.removeEventListener('openCreateTask', handleOpenCreate);
   }, []);
 
   const handleTaskClick = (taskId: number) => {
+    console.log('Task clicked:', taskId);
     setSelectedTaskId(taskId);
     setIsDetailDialogOpen(true);
+  };
+
+  const handleOpenCreateDialog = () => {
+    console.log('handleOpenCreateDialog called, setting to true');
+    setIsCreateDialogOpen(true);
   };
 
   return (

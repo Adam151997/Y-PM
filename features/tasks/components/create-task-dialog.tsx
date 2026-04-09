@@ -43,6 +43,7 @@ export function CreateTaskDialog({
   onOpenChange,
   onSuccess,
 }: CreateTaskDialogProps) {
+  console.log('CreateTaskDialog render, open:', open, 'projectId:', projectId);
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
 
