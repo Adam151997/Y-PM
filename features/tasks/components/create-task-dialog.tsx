@@ -100,8 +100,8 @@ export function CreateTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="bg-black/80" style={{ zIndex: 9998 }} />
-      <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-xl border border-border/50 shadow-2xl" style={{ zIndex: 9999 }}>
+      <DialogOverlay className="bg-black/80 z-[9998]" />
+      <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-xl border border-border/50 shadow-2xl z-[9999]">
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
           <DialogDescription>Add a new task to your project</DialogDescription>
