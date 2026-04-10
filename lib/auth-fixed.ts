@@ -20,11 +20,16 @@ export interface JWTPayload {
 }
 
 export function signToken(userId: number, email: string, name: string): string {
-  return jwt.sign(
+  console.log('[Auth] signToken: Creating token for user:', email);
+  console.log('[Auth] signToken: Using secret:', JWT_SECRET.substring(0, 10) + '...');
+  const token = jwt.sign(
     { userId, email, name },
     JWT_SECRET,
     { expiresIn: '7d' }
   );
+  console.log('[Auth] signToken: Token created, length:', token.length);
+  console.log('[Auth] signToken: Token first 50 chars:', token.substring(0, 50));
+  return token;
 }
 
 // Server Component version - uses headers from middleware

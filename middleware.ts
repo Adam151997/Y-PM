@@ -36,6 +36,10 @@ export function middleware(request: NextRequest) {
   const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-production';
   
   try {
+    console.log('[Middleware] Verifying token with secret:', JWT_SECRET.substring(0, 10) + '...');
+    console.log('[Middleware] Token length:', token.length);
+    console.log('[Middleware] Token first 50 chars:', token.substring(0, 50));
+    
     const payload = jwt.verify(token, JWT_SECRET) as {
       userId: number;
       email: string;
