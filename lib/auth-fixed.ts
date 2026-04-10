@@ -93,10 +93,19 @@ export async function getCurrentUserHybrid(): Promise<{ id: number; email: strin
   try {
     // Try Server Component approach first
     const user = await getCurrentUserServer();
-    if (user) return user;
+    if (user) {
+      console.log('[Auth] getCurrentUserHybrid: Found user via headers');
+      return user;
+    }
     
     // Fall back to Client Component approach
-    return await getCurrentUser();
+    const cookieUser = await getCurrentUser();
+    if (cookieUser) {
+      console.log('[Auth] getCurrentUserHybrid: Found user via cookies');
+    } else {
+      console.log('[Auth] getCurrentUserHybrid: No user found');
+    }
+    return cookieUser;
   } catch (error) {
     console.error('Error in getCurrentUserHybrid:', error);
     return null;
@@ -104,6 +113,7 @@ export async function getCurrentUserHybrid(): Promise<{ id: number; email: strin
 }
 
 export async function setAuthCookie(token: string) {
+  console.log('[Auth] setAuthCookie: Setting auth cookie');
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
@@ -112,6 +122,7 @@ export async function setAuthCookie(token: string) {
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
   });
+  console.log('[Auth] setAuthCookie: Cookie set successfully');
 }
 
 export async function clearAuthCookie() {

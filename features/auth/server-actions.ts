@@ -74,8 +74,11 @@ export async function login(input: LoginInput) {
   }
 
   // Create token and set cookie
+  console.log('[Login] Creating token for user:', user.email);
   const token = signToken(user.id, user.email, user.name);
+  console.log('[Login] Token created, setting cookie...');
   await setAuthCookie(token);
+  console.log('[Login] Cookie set, returning success');
 
   // Return success - client will handle redirect
   return { success: true };
