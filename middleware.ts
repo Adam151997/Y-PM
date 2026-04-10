@@ -1,6 +1,74 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+
+// Edge-compatible JWT verification using Web Crypto API
+async function verifyJWT(token: string, secret: string): Promise<{ userId: number; email: string; name: string } | null> {
+  try {
+    // JWT format: header.payload.signature
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.log('[JWT] Invalid token format');
+      return null;
+    }
+
+    const [headerB64, payloadB64, signatureB64] = parts;
+    
+    // Helper to decode base64url
+    function base64UrlDecode(str: string): string {
+      // Convert from base64url to base64
+      let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+      // Add padding
+      while (base64.length % 4) {
+        base64 += '=';
+      }
+      return atob(base64);
+    }
+    
+    // Decode payload
+    const payloadJson = base64UrlDecode(payloadB64);
+    const payload = JSON.parse(payloadJson);
+    
+    // Verify signature using Web Crypto API
+    const encoder = new TextEncoder();
+    const data = encoder.encode(headerB64 + '.' + payloadB64);
+    const secretKey = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+    
+    const signature = Uint8Array.from(base64UrlDecode(signatureB64), c => c.charCodeAt(0));
+    
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      secretKey,
+      signature,
+      data
+    );
+    
+    if (!isValid) {
+      console.log('[JWT] Invalid signature');
+      return null;
+    }
+    
+    // Check expiration
+    if (payload.exp && Date.now() >= payload.exp * 1000) {
+      console.log('[JWT] Token expired');
+      return null;
+    }
+    
+    return {
+      userId: payload.userId,
+      email: payload.email,
+      name: payload.name,
+    };
+  } catch (error) {
+    console.log('[JWT] Verification error:', error);
+    return null;
+  }
+}
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value;
@@ -35,17 +103,13 @@ export function middleware(request: NextRequest) {
   // Verify token
   const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-production';
   
-  try {
-    console.log('[Middleware] Verifying token with secret:', JWT_SECRET.substring(0, 10) + '...');
-    console.log('[Middleware] Token length:', token.length);
-    console.log('[Middleware] Token first 50 chars:', token.substring(0, 50));
-    
-    const payload = jwt.verify(token, JWT_SECRET) as {
-      userId: number;
-      email: string;
-      name: string;
-    };
-    
+  console.log('[Middleware] Verifying token with secret:', JWT_SECRET.substring(0, 10) + '...');
+  console.log('[Middleware] Token length:', token.length);
+  console.log('[Middleware] Token first 50 chars:', token.substring(0, 50));
+  
+  const payload = await verifyJWT(token, JWT_SECRET);
+  
+  if (payload) {
     console.log('[Middleware] Token valid, user:', payload.email);
 
     // Add user info to headers for server components
@@ -59,9 +123,8 @@ export function middleware(request: NextRequest) {
         headers: requestHeaders,
       },
     });
-  } catch (error) {
+  } else {
     console.log('[Middleware] Token invalid, redirecting to /login');
-    console.log('[Middleware] Error:', error instanceof Error ? error.message : String(error));
     const loginUrl = new URL('/login', request.url);
     
     // Clear the invalid cookie
@@ -76,5 +139,4 @@ export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-  runtime: 'nodejs',
 };
