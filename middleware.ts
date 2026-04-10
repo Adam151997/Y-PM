@@ -94,7 +94,7 @@ async function verifyJWT(token: string, secret: string): Promise<{ userId: numbe
   }
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value;
   const { pathname } = request.nextUrl;
   
