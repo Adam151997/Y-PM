@@ -11,9 +11,11 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register: formRegister,
@@ -26,9 +28,19 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
     try {
-      await loginAction(data);
-    } catch (err) {
-      // Next.js redirect throws an error - we can ignore it
+      const result = await loginAction(data);
+      
+      if (result && 'error' in result) {
+        toast.error(result.error);
+      } else if (result && 'success' in result) {
+        // Login successful, redirect to dashboard
+        toast.success('Login successful!');
+        router.push('/dashboard');
+        router.refresh(); // Refresh to update auth state
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      toast.error('An unexpected error occurred');
     } finally {
       setTimeout(() => setIsLoading(false), 100);
     }

@@ -44,8 +44,8 @@ export async function register(input: InternalRegisterInput) {
   const token = signToken(newUser.id, newUser.email, newUser.name);
   await setAuthCookie(token);
 
-  // Use server-side redirect to avoid client-side navigation issues
-  redirect('/dashboard');
+  // Return success - client will handle redirect
+  return { success: true };
 }
 
 export async function login(input: LoginInput) {
@@ -77,13 +77,13 @@ export async function login(input: LoginInput) {
   const token = signToken(user.id, user.email, user.name);
   await setAuthCookie(token);
 
-  // Use server-side redirect to avoid client-side navigation issues
-  redirect('/dashboard');
+  // Return success - client will handle redirect
+  return { success: true };
 }
 
 export async function logout() {
   await clearAuthCookie();
-  redirect('/login');
+  return { success: true };
 }
 
 export async function getSessionUser() {
