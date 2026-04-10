@@ -37,9 +37,9 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Projects', href: '/projects', icon: FolderKanban },
-  { name: 'Activity', href: '/activities', icon: Activity },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, shortcut: 'G D' },
+  { name: 'Projects', href: '/projects', icon: FolderKanban, shortcut: 'G P' },
+  { name: 'Activity', href: '/activities', icon: Activity, shortcut: 'G A' },
 ];
 
 export function Sidebar({ user }: SidebarProps) {
@@ -79,29 +79,41 @@ export function Sidebar({ user }: SidebarProps) {
 
         {/* New Project Button */}
         <div className="p-3">
-          <Button
-            asChild
-            className={cn(
-              'w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 border-0 shadow-lg shadow-indigo-500/20',
-              isCollapsed && 'px-0'
-            )}
-          >
-            <Link href="/projects/new">
-              <Plus className="h-4 w-4 flex-shrink-0" />
-              <AnimatePresence>
-                {!isCollapsed && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="ml-2 whitespace-nowrap"
-                  >
-                    New Project
-                  </motion.span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                asChild
+                className={cn(
+                  'w-full bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary border-0 shadow-lg shadow-primary/20',
+                  isCollapsed && 'px-0'
                 )}
-              </AnimatePresence>
-            </Link>
-          </Button>
+              >
+                <Link href="/projects/new">
+                  <Plus className="h-4 w-4 flex-shrink-0" />
+                  <AnimatePresence>
+                    {!isCollapsed && (
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="ml-2 whitespace-nowrap"
+                      >
+                        New Project
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            {isCollapsed && (
+              <TooltipContent side="right" className="flex items-center gap-2">
+                <span>New Project</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-secondary text-text-tertiary font-mono text-[10px]">
+                  ⌘N
+                </kbd>
+              </TooltipContent>
+            )}
+          </Tooltip>
         </div>
 
         {/* Search - Command Palette Trigger */}
@@ -144,35 +156,49 @@ export function Sidebar({ user }: SidebarProps) {
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                      'group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
                       isActive
-                        ? 'bg-indigo-500/10 text-indigo-400'
-                        : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground',
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-text-secondary hover:bg-accent hover:text-text-primary',
                       isCollapsed && 'justify-center px-2'
                     )}
                   >
-                    <item.icon
-                      className={cn(
-                        'h-5 w-5 flex-shrink-0',
-                        isActive && 'text-indigo-400'
-                      )}
-                    />
-                    <AnimatePresence>
-                      {!isCollapsed && (
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="whitespace-nowrap"
-                        >
-                          {item.name}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <item.icon
+                        className={cn(
+                          'h-5 w-5 flex-shrink-0',
+                          isActive && 'text-primary'
+                        )}
+                      />
+                      <AnimatePresence>
+                        {!isCollapsed && (
+                          <motion.span
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="whitespace-nowrap"
+                          >
+                            {item.name}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    {!isCollapsed && item.shortcut && (
+                      <kbd className="hidden group-hover:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-secondary text-text-tertiary font-mono text-[10px] flex-shrink-0 opacity-70">
+                        {item.shortcut}
+                      </kbd>
+                    )}
                   </Link>
                 </TooltipTrigger>
                 {isCollapsed && (
-                  <TooltipContent side="right">{item.name}</TooltipContent>
+                  <TooltipContent side="right" className="flex items-center gap-2">
+                    <span>{item.name}</span>
+                    {item.shortcut && (
+                      <kbd className="px-1.5 py-0.5 rounded bg-secondary text-text-tertiary font-mono text-[10px]">
+                        {item.shortcut}
+                      </kbd>
+                    )}
+                  </TooltipContent>
                 )}
               </Tooltip>
             );
