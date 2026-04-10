@@ -10,7 +10,15 @@ export function middleware(request: NextRequest) {
 
   // Allow public routes
   const publicPaths = ['/login', '/register', '/api', '/_next', '/favicon.ico', '/'];
-  const isPublicPath = publicPaths.some(path => pathname === path || pathname.startsWith(path));
+  const isPublicPath = publicPaths.some(path => {
+    if (path === '/') {
+      // Only match exactly '/' for the root path
+      return pathname === path;
+    } else {
+      // For other paths, match exact or starts with path/
+      return pathname === path || pathname === path + '/' || pathname.startsWith(path + '/');
+    }
+  });
 
   if (isPublicPath) {
     console.log('[Middleware] Allowing public path');
