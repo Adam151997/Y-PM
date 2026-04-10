@@ -24,22 +24,44 @@ async function verifyJWT(token: string, secret: string): Promise<{ userId: numbe
       return atob(base64);
     }
     
+    // Decode header to check algorithm
+    const headerJson = base64UrlDecode(headerB64);
+    const header = JSON.parse(headerJson);
+    console.log('[JWT] Header:', header);
+    
     // Decode payload
     const payloadJson = base64UrlDecode(payloadB64);
     const payload = JSON.parse(payloadJson);
     
+    console.log('[JWT] Payload:', payload);
+    
     // Verify signature using Web Crypto API
     const encoder = new TextEncoder();
     const data = encoder.encode(headerB64 + '.' + payloadB64);
+    console.log('[JWT] Data to verify:', headerB64 + '.' + payloadB64);
+    
+    // Try to decode secret as base64 first, fall back to raw string
+    let secretBytes: Uint8Array;
+    try {
+      // Try base64 decode
+      secretBytes = Uint8Array.from(base64UrlDecode(secret), c => c.charCodeAt(0));
+      console.log('[JWT] Using base64-decoded secret');
+    } catch {
+      // Fall back to raw string
+      secretBytes = encoder.encode(secret);
+      console.log('[JWT] Using raw string secret');
+    }
+    
     const secretKey = await crypto.subtle.importKey(
       'raw',
-      encoder.encode(secret),
+      secretBytes,
       { name: 'HMAC', hash: 'SHA-256' },
       false,
       ['verify']
     );
     
     const signature = Uint8Array.from(base64UrlDecode(signatureB64), c => c.charCodeAt(0));
+    console.log('[JWT] Signature length:', signature.length);
     
     const isValid = await crypto.subtle.verify(
       'HMAC',
@@ -47,6 +69,8 @@ async function verifyJWT(token: string, secret: string): Promise<{ userId: numbe
       signature,
       data
     );
+    
+    console.log('[JWT] Signature valid:', isValid);
     
     if (!isValid) {
       console.log('[JWT] Invalid signature');
