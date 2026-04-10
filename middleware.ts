@@ -61,8 +61,14 @@ export function middleware(request: NextRequest) {
     });
   } catch (error) {
     console.log('[Middleware] Token invalid, redirecting to /login');
+    console.log('[Middleware] Error:', error instanceof Error ? error.message : String(error));
     const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+    
+    // Clear the invalid cookie
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete('auth-token');
+    
+    return response;
   }
 }
 

@@ -88,7 +88,7 @@ export async function getCurrentUser(): Promise<{ id: number; email: string; nam
       avatar: user.avatar,
     };
   } catch (error) {
-    console.error('Error in getCurrentUser:', error);
+    console.error('[Auth] Error in getCurrentUser:', error instanceof Error ? error.message : String(error));
     return null;
   }
 }
