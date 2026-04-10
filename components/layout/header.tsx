@@ -10,7 +10,8 @@ import {
   ChevronDown,
   Search,
   Plus,
-  Command,
+  Menu,
+  X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -30,8 +31,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Breadcrumbs } from '@/components/layout/breadcrumbs';
 import { getInitials } from '@/lib/utils';
 import { logout } from '@/features/auth/server-actions';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   user: {
@@ -40,6 +43,8 @@ interface HeaderProps {
     email: string;
     avatar: string | null;
   };
+  showMobileMenu?: boolean;
+  onMobileMenuToggle?: () => void;
 }
 
 // Mock projects for the switcher - in a real app this would come from props or context
@@ -47,9 +52,11 @@ const mockProjects = [
   { id: 1, name: 'Website Redesign', color: '#6366f1' },
   { id: 2, name: 'Mobile App', color: '#10b981' },
   { id: 3, name: 'Marketing Campaign', color: '#f59e0b' },
+  { id: 4, name: 'Q4 Planning', color: '#8b5cf6' },
+  { id: 5, name: 'Customer Portal', color: '#ec4899' },
 ];
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, showMobileMenu, onMobileMenuToggle }: HeaderProps) {
   const router = useRouter();
   const [isProjectSwitcherOpen, setIsProjectSwitcherOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -61,69 +68,110 @@ export function Header({ user }: HeaderProps) {
 
   return (
     <>
-      <header className="h-16 border-b bg-card/50 backdrop-blur-sm flex items-center justify-between px-6 sticky top-0 z-10">
-        {/* Project Switcher */}
-        <div className="flex items-center gap-2">
-          <DropdownMenu open={isProjectSwitcherOpen} onOpenChange={setIsProjectSwitcherOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-secondary/50 transition-colors"
-              >
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: selectedProject.color }}
-                />
-                <span className="font-medium text-sm">{selectedProject.name}</span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="w-64 p-2"
-              sideOffset={8}
-            >
-              <div className="px-2 py-1.5">
-                <p className="text-xs font-medium text-muted-foreground">Projects</p>
-              </div>
-              {mockProjects.map((project) => (
-                <DropdownMenuItem
-                  key={project.id}
-                  className="flex items-center gap-3 px-2 py-2 rounded-lg cursor-pointer"
-                  onClick={() => router.push(`/projects/${project.id}`)}
+      <header className="h-16 border-b bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 md:px-6 sticky top-0 z-30">
+        {/* Left Section: Mobile Menu + Project Switcher */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={onMobileMenuToggle}
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-secondary/50 transition-colors"
+            aria-label={showMobileMenu ? 'Close menu' : 'Open menu'}
+          >
+            {showMobileMenu ? (
+              <X className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <Menu className="h-5 w-5 text-muted-foreground" />
+            )}
+          </button>
+
+          {/* Project Switcher */}
+          <div className="hidden md:flex items-center gap-2">
+            <DropdownMenu open={isProjectSwitcherOpen} onOpenChange={setIsProjectSwitcherOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-secondary/50 transition-colors group"
                 >
                   <div
-                    className="w-3 h-3 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: project.color }}
+                    className="w-3 h-3 rounded-full transition-transform group-hover:scale-110"
+                    style={{ backgroundColor: selectedProject.color }}
                   />
-                  <span className="text-sm">{project.name}</span>
+                  <span className="font-medium text-sm">{selectedProject.name}</span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-hover:rotate-180" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-64 p-2 fade-in"
+                sideOffset={8}
+              >
+                <div className="px-2 py-1.5">
+                  <p className="text-xs font-medium text-muted-foreground">Projects</p>
+                </div>
+                {mockProjects.map((project) => (
+                  <DropdownMenuItem
+                    key={project.id}
+                    className="flex items-center gap-3 px-2 py-2 rounded-lg cursor-pointer hover-lift"
+                    onClick={() => router.push(`/projects/${project.id}`)}
+                  >
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0 transition-transform hover:scale-110"
+                      style={{ backgroundColor: project.color }}
+                    />
+                    <span className="text-sm">{project.name}</span>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator className="my-2" />
+                <DropdownMenuItem className="px-2 py-2 rounded-lg cursor-pointer hover-lift">
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span className="text-sm">Create new project</span>
                 </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator className="my-2" />
-              <DropdownMenuItem className="px-2 py-2 rounded-lg cursor-pointer">
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="text-sm">Create new project</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Mobile Project Name */}
+          <div className="md:hidden flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: selectedProject.color }}
+            />
+            <span className="font-medium text-sm truncate max-w-[120px]">
+              {selectedProject.name}
+            </span>
+          </div>
         </div>
 
-        {/* Search */}
-        <div className="flex-1 max-w-xl mx-8">
+        {/* Center Section: Breadcrumbs (Desktop) */}
+        <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
+          <Breadcrumbs className="flex-1" />
+        </div>
+
+        {/* Right Section */}
+        <div className="flex items-center gap-1 md:gap-2">
+          {/* Search - Mobile */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="w-full flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border/50 text-muted-foreground text-sm hover:bg-secondary/80 transition-colors"
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-secondary/50 transition-colors"
+            aria-label="Search"
           >
-            <Search className="h-4 w-4" />
-            <span className="flex-1 text-left">Search projects, tasks...</span>
-            <kbd className="inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-              <span className="text-xs">⌘</span>K
-            </kbd>
+            <Search className="h-5 w-5 text-muted-foreground" />
           </button>
-        </div>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-2">
+          {/* Search - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-md">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="w-full flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border/50 text-muted-foreground text-sm hover:bg-secondary/80 transition-colors hover-lift"
+            >
+              <Search className="h-4 w-4" />
+              <span className="flex-1 text-left truncate">Search projects, tasks...</span>
+              <kbd className="hidden lg:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </button>
+          </div>
+
           {/* Notifications */}
           <Button
             variant="ghost"
@@ -131,7 +179,7 @@ export function Header({ user }: HeaderProps) {
             className="relative rounded-xl hover:bg-secondary/50"
           >
             <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-500 rounded-full" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full animate-pulse-subtle" />
           </Button>
 
           {/* User Menu */}
@@ -139,36 +187,36 @@ export function Header({ user }: HeaderProps) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-secondary/50 transition-colors"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-secondary/50 transition-colors hover-lift"
               >
-                <Avatar className="h-8 w-8 ring-2 ring-border">
+                <Avatar className="h-8 w-8 ring-2 ring-border transition-transform hover:scale-105">
                   <AvatarImage src={user.avatar ?? undefined} />
-                  <AvatarFallback className="bg-indigo-500/20 text-indigo-400 text-sm">
+                  <AvatarFallback className="bg-primary/20 text-primary text-sm">
                     {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium hidden md:inline">{user.name}</span>
-                <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:inline" />
+                <span className="text-sm font-medium hidden lg:inline">{user.name}</span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground hidden lg:inline transition-transform group-hover:rotate-180" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-2" sideOffset={8}>
+            <DropdownMenuContent align="end" className="w-56 p-2 fade-in" sideOffset={8}>
               <div className="px-2 py-2">
                 <p className="font-medium text-sm">{user.name}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="rounded-lg px-2 py-2 cursor-pointer">
+              <DropdownMenuItem className="rounded-lg px-2 py-2 cursor-pointer hover-lift">
                 <User className="h-4 w-4 mr-2" />
                 <span className="text-sm">Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg px-2 py-2 cursor-pointer">
-                <Settings className="h-4 w-4 mr-2" />
+              <DropdownMenuItem className="rounded-lg px-2 py-2 cursor-pointer hover-lift">
+                <SettingsIcon className="h-4 w-4 mr-2" />
                 <span className="text-sm">Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="rounded-lg px-2 py-2 cursor-pointer text-destructive hover:text-destructive"
+                className="rounded-lg px-2 py-2 cursor-pointer text-destructive hover:text-destructive hover-lift"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 <span className="text-sm">Log out</span>
@@ -177,6 +225,11 @@ export function Header({ user }: HeaderProps) {
           </DropdownMenu>
         </div>
       </header>
+
+      {/* Mobile Breadcrumbs */}
+      <div className="lg:hidden border-b bg-card/30 px-4 py-2">
+        <Breadcrumbs className="text-sm" showHome={false} />
+      </div>
 
       {/* Command Palette Dialog */}
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
@@ -207,7 +260,7 @@ export function Header({ user }: HeaderProps) {
   );
 }
 
-function Settings({ className }: { className?: string }) {
+function SettingsIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}

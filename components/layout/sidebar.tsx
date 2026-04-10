@@ -156,11 +156,11 @@ export function Sidebar({ user }: SidebarProps) {
                   <Link
                     href={item.href}
                     className={cn(
-                      'group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+                      'group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative',
                       isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-text-secondary hover:bg-accent hover:text-text-primary',
-                      isCollapsed && 'justify-center px-2'
+                        ? 'bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-primary before:rounded-r before:transition-all before:duration-200'
+                        : 'text-text-secondary hover:bg-accent hover:text-text-primary hover:before:absolute hover:before:left-0 hover:before:top-1/2 hover:before:-translate-y-1/2 hover:before:w-1 hover:before:h-4 hover:before:bg-primary/30 hover:before:rounded-r hover:before:transition-all hover:before:duration-200',
+                      isCollapsed && 'justify-center px-2 before:hidden hover:before:hidden'
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
