@@ -36,6 +36,10 @@ export function middleware(request: NextRequest) {
   const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-do-not-use-in-production';
   
   try {
+    console.log('[Middleware] Verifying token with secret:', JWT_SECRET.substring(0, 10) + '...');
+    console.log('[Middleware] Token length:', token.length);
+    console.log('[Middleware] Token first 50 chars:', token.substring(0, 50));
+    
     const payload = jwt.verify(token, JWT_SECRET) as {
       userId: number;
       email: string;
@@ -57,8 +61,14 @@ export function middleware(request: NextRequest) {
     });
   } catch (error) {
     console.log('[Middleware] Token invalid, redirecting to /login');
+    console.log('[Middleware] Error:', error instanceof Error ? error.message : String(error));
     const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+    
+    // Clear the invalid cookie
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete('auth-token');
+    
+    return response;
   }
 }
 
