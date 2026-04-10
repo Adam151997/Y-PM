@@ -63,7 +63,11 @@ export function Header({ user, showMobileMenu, onMobileMenuToggle }: HeaderProps
   const [selectedProject] = useState(mockProjects[0]);
 
   const handleLogout = async () => {
-    await logout();
+    const result = await logout();
+    if (result?.success) {
+      router.push('/login');
+      router.refresh();
+    }
   };
 
   return (

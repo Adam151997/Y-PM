@@ -10,11 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User, Mail, Lock, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export type RegisterFormInput = RegisterInput;
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register: formRegister,
@@ -27,13 +30,23 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormInput) => {
     setIsLoading(true);
     try {
-      await registerAction({
+      const result = await registerAction({
         name: data.name,
         email: data.email,
         password: data.password,
       });
-    } catch (err) {
-      // Next.js redirect throws an error
+      
+      if (result && 'error' in result) {
+        toast.error(result.error);
+      } else if (result && 'success' in result) {
+        // Registration successful, redirect to dashboard
+        toast.success('Registration successful!');
+        router.push('/dashboard');
+        router.refresh(); // Refresh to update auth state
+      }
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      toast.error('An unexpected error occurred');
     } finally {
       setTimeout(() => setIsLoading(false), 100);
     }
