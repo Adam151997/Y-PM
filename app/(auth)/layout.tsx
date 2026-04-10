@@ -6,9 +6,13 @@ export default async function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
+  console.log('[AuthLayout] Checking if user is authenticated...');
   const user = await getCurrentUserHybrid();
+  
+  console.log('[AuthLayout] User:', user ? `Found (${user.email})` : 'Not found');
 
   if (user) {
+    console.log('[AuthLayout] User is authenticated, redirecting to /dashboard');
     redirect('/dashboard');
   }
 
